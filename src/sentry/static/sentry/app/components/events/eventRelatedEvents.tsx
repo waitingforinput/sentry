@@ -89,7 +89,7 @@ const EventRelatedEvents = ({event, organization, location}: Props) => {
             if (!discoverData.tableData?.data) {
               return renderEmptyState(
                 t(
-                  "Sorry, but it seems that you don't have access to the discover endpoints"
+                  "Sorry, but it seems that you don't have access to discover"
                 )
               );
             }
