@@ -14,16 +14,21 @@ type RelatedEventsProps = React.ComponentProps<typeof RelatedEvents>;
 
 export type GroupRelatedEventsProps = Pick<
   RelatedEventsProps,
-  'eventView' | 'relatedEvents'
+  'eventView' | 'relatedEvents' | 'location'
 >;
 
 type Props = {
   organization: Organization;
 } & GroupRelatedEventsProps;
 
-const GroupRelatedEvents = ({eventView, organization, relatedEvents}: Props) => {
+const GroupRelatedEvents = ({
+  eventView,
+  organization,
+  relatedEvents,
+  location,
+}: Props) => {
   const orgSlug = organization.slug;
-  const orgFeatures = new Set(organization.features);
+  const orgFeatures = organization.features;
   const currentLocation = getCurrentLocation();
 
   if (!relatedEvents.length) {
@@ -43,8 +48,9 @@ const GroupRelatedEvents = ({eventView, organization, relatedEvents}: Props) => 
       <RelatedEvents
         eventView={eventView}
         relatedEvents={relatedEvents}
-        orgSlug={orgSlug}
+        organization={organization}
         currentLocation={currentLocation}
+        location={location}
       />
     </React.Fragment>
   );

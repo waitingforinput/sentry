@@ -1,13 +1,14 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import capitalize from 'lodash/capitalize';
+import {Location} from 'history';
 
 import space from 'app/styles/space';
 import {t} from 'app/locale';
 import DateTime from 'app/components/dateTime';
 import {Organization} from 'app/types';
 import EventView from 'app/utils/discover/eventView';
-import {transactionSummaryRouteWithQuery} from 'app/views/performance/transactionSummary/utils';
+import {getTransactionDetailsUrl} from 'app/views/performance/utils';
 import {PanelTable, PanelItem} from 'app/components/panels';
 import PlatformIcon from 'app/components/platformIcon';
 import Link from 'app/components/links/link';
@@ -27,22 +28,28 @@ enum EVENT_TYPE {
 type Props = {
   relatedEvents: Array<TableDataRow>;
   eventView: EventView;
-  orgSlug: Organization['slug'];
+  organization: Organization;
   currentLocation: CURRENT_LOCATION;
+  location: Location;
 };
 
 // List events that have the same tracing ID as the current Event
-const RelatedEvents = ({currentLocation, orgSlug, eventView, relatedEvents}: Props) => {
-  const getTransactionLink = (projectId: string, transationName: string) => {
-    return transactionSummaryRouteWithQuery({
-      orgSlug,
-      transaction: transationName,
-      projectID: projectId,
-      query: {
-        ...eventView.clone().getGlobalSelectionQuery(),
-        query: eventView.query,
-      },
-    });
+const RelatedEvents = ({
+  currentLocation,
+  eventView,
+  relatedEvents,
+  organization,
+  location,
+}: Props) => {
+  const orgSlug = organization.slug;
+
+  const getTransactionLink = (transactionName: string, eventSlug: string) => {
+    return getTransactionDetailsUrl(
+      organization,
+      eventSlug,
+      transactionName,
+      location.query
+    );
   };
 
   const getEventTarget = (dataRow: TableDataRow & {type: EVENT_TYPE}) => {
@@ -56,9 +63,13 @@ const RelatedEvents = ({currentLocation, orgSlug, eventView, relatedEvents}: Pro
       });
     }
 
-    return dataRow.type === EVENT_TYPE.ERROR
-      ? `/organizations/${orgSlug}/issues/${dataRow['issue.id']}/events/${dataRow.id}/`
-      : getTransactionLink(String(dataRow['project.id']), String(dataRow.title));
+    if (dataRow.type === EVENT_TYPE.ERROR) {
+      return `/organizations/${orgSlug}/issues/${dataRow['issue.id']}/events/${dataRow.id}/`;
+    }
+
+    const eventSlug = generateEventSlug(dataRow);
+
+    return getTransactionLink(String(dataRow.title), eventSlug);
   };
 
   const renderEventId = (dataRow: TableDataRow & {type: EVENT_TYPE}) => (

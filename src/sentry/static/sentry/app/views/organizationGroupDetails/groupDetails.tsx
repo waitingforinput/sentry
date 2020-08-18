@@ -270,7 +270,7 @@ class GroupDetails extends React.Component<Props, State> {
     }
 
     const {organization} = this.props;
-    const orgFeatures = new Set(organization.features);
+    const orgFeatures = organization.features;
     const dateCreated = moment(event.dateCreated).valueOf() / 1000;
     const pointInTime = event?.dateReceived
       ? moment(event.dateReceived).valueOf() / 1000
@@ -296,7 +296,7 @@ class GroupDetails extends React.Component<Props, State> {
       ],
       orderby: '-timestamp',
       query: `trace:${traceID}`,
-      projects: orgFeatures.has('global-views')
+      projects: orgFeatures.includes('global-views')
         ? [ALL_ACCESS_PROJECTS]
         : [Number(event?.projectID)],
       version: 2,
@@ -310,7 +310,7 @@ class GroupDetails extends React.Component<Props, State> {
     relatedEvents: Array<TableDataRow>,
     eventView?: EventView
   ) {
-    const {children, environments} = this.props;
+    const {children, environments, location} = this.props;
     const {group, event} = this.state;
 
     return (
@@ -328,6 +328,7 @@ class GroupDetails extends React.Component<Props, State> {
               event,
               relatedEvents,
               eventView,
+              location,
             })
           : children}
       </React.Fragment>
@@ -336,12 +337,14 @@ class GroupDetails extends React.Component<Props, State> {
 
   renderContent(project: AvatarProject) {
     const eventView = this.getEventView();
+    const {organization, location} = this.props;
+    const orgFeatures = organization.features;
 
-    if (!eventView) {
+    // the related-events feature flag is going to be removed
+    if (!eventView || !orgFeatures.includes('related-events')) {
       return this.renderInnerContent(project, []);
     }
 
-    const {location, organization} = this.props;
     const {event} = this.state;
 
     return (

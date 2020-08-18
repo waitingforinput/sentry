@@ -23,35 +23,16 @@ type Props = {
   organization: Organization;
 };
 
-type State = {
-  isLoading: boolean;
-  orgFeatures: Set<string>;
-  orgSlug: string;
-  eventView?: EventView;
-};
+const EventRelatedEvents = ({event, organization, location}: Props) => {
+  const orgFeatures = organization.features;
 
-class EventRelatedEvents extends React.Component<Props, State> {
-  state: State = {
-    isLoading: true,
-    orgFeatures: new Set(this.props.organization.features),
-    orgSlug: this.props.organization.slug,
-  };
-
-  componentDidMount() {
-    this.getEventView();
-  }
-
-  getEventView() {
-    const {event, organization} = this.props;
-
+  const getEventView = () => {
     const traceID = event.contexts?.trace?.trace_id;
 
     if (!traceID) {
-      this.setState({isLoading: false});
-      return;
+      return undefined;
     }
 
-    const orgFeatures = new Set(organization.features);
     const dateCreated = moment(event.dateCreated).valueOf() / 1000;
     const pointInTime = event.dateReceived
       ? moment(event.dateReceived).valueOf() / 1000
@@ -62,7 +43,7 @@ class EventRelatedEvents extends React.Component<Props, State> {
       end: pointInTime,
     });
 
-    const eventFromSavedQuery = EventView.fromSavedQuery({
+    return EventView.fromSavedQuery({
       id: undefined,
       name: `Events with Trace ID ${traceID}`,
       fields: [
@@ -77,76 +58,66 @@ class EventRelatedEvents extends React.Component<Props, State> {
       ],
       orderby: '-timestamp',
       query: `trace:${traceID}`,
-      projects: orgFeatures.has('global-views')
+      projects: orgFeatures.includes('global-views')
         ? [ALL_ACCESS_PROJECTS]
         : [Number(event.projectID)],
       version: 2,
       start,
       end,
     });
+  };
 
-    this.setState({eventView: eventFromSavedQuery, isLoading: false});
-  }
+  const renderEmptyState = (message?: string) => <EmptyState message={message} />;
 
-  renderEmptyState(message?: string) {
-    return <EmptyState message={message} />;
-  }
+  const eventView = getEventView();
+  const currentLocation = getCurrentLocation();
+  const orgSlug = organization.slug;
 
-  render() {
-    const {location, event} = this.props;
-    const {isLoading, eventView, orgSlug, orgFeatures} = this.state;
+  return (
+    <EventDataSection
+      type="related-events"
+      title={t('Related Events')}
+      actions={getDiscoverButton({orgSlug, currentLocation, orgFeatures, eventView})}
+    >
+      {eventView ? (
+        <DiscoverQuery location={location} eventView={eventView} orgSlug={orgSlug}>
+          {discoverData => {
+            if (discoverData.isLoading) {
+              return <LoadingIndicator />;
+            }
 
-    if (isLoading) {
-      return <LoadingIndicator />;
-    }
-
-    const currentLocation = getCurrentLocation();
-
-    return (
-      <EventDataSection
-        type="related-events"
-        title={t('Related Events')}
-        actions={getDiscoverButton({orgSlug, currentLocation, orgFeatures, eventView})}
-      >
-        {eventView ? (
-          <DiscoverQuery location={location} eventView={eventView} orgSlug={orgSlug}>
-            {discoverData => {
-              if (discoverData.isLoading) {
-                return <LoadingIndicator />;
-              }
-
-              if (!discoverData.tableData?.data) {
-                return this.renderEmptyState(
-                  t(
-                    "Sorry, but it seems that you don't have access to the discover endpoints"
-                  )
-                );
-              }
-
-              const relatedEvents = uniqBy(discoverData.tableData?.data, 'id').filter(
-                evt => evt.id !== event?.id
+            if (!discoverData.tableData?.data) {
+              return renderEmptyState(
+                t(
+                  "Sorry, but it seems that you don't have access to the discover endpoints"
+                )
               );
+            }
 
-              if (!relatedEvents.length) {
-                return this.renderEmptyState();
-              }
+            const relatedEvents = uniqBy(discoverData.tableData?.data, 'id').filter(
+              evt => evt.id !== event.id
+            );
 
-              return (
-                <RelatedEvents
-                  relatedEvents={relatedEvents}
-                  eventView={eventView}
-                  currentLocation={currentLocation}
-                  orgSlug={orgSlug}
-                />
-              );
-            }}
-          </DiscoverQuery>
-        ) : (
-          this.renderEmptyState()
-        )}
-      </EventDataSection>
-    );
-  }
-}
+            if (!relatedEvents.length) {
+              return renderEmptyState();
+            }
+
+            return (
+              <RelatedEvents
+                relatedEvents={relatedEvents}
+                eventView={eventView}
+                currentLocation={currentLocation}
+                organization={organization}
+                location={location}
+              />
+            );
+          }}
+        </DiscoverQuery>
+      ) : (
+        renderEmptyState()
+      )}
+    </EventDataSection>
+  );
+};
 
 export default EventRelatedEvents;

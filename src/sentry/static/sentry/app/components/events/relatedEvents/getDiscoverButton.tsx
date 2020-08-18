@@ -11,13 +11,13 @@ import {CURRENT_LOCATION} from './types';
 type Props = {
   currentLocation: CURRENT_LOCATION;
   orgSlug: Organization['slug'];
-  orgFeatures: Set<string>;
+  orgFeatures: Organization['features'];
   eventView?: EventView;
 };
 
 function getDiscoverButton({currentLocation, eventView, orgFeatures, orgSlug}: Props) {
   if (
-    !orgFeatures.has('discover-basic') ||
+    !orgFeatures.includes('discover-basic') ||
     currentLocation === CURRENT_LOCATION.DISCOVER ||
     !eventView
   ) {

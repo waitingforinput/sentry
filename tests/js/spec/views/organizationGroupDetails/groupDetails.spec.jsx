@@ -17,7 +17,7 @@ describe('groupDetails', function() {
   let wrapper;
   const group = TestStubs.Group();
   const event = TestStubs.Event();
-  const location = TestStubs.location({
+  let location = TestStubs.location({
     pathname: `/organizations/org-slug/issues/${group.id}/`,
     query: {},
     search: '?foo=bar',
@@ -169,6 +169,7 @@ describe('groupDetails', function() {
         event,
         eventView: undefined,
         relatedEvents: [],
+        location,
       },
       {}
     );
@@ -217,16 +218,19 @@ describe('groupDetails', function() {
   });
 
   it('fetches issue details for a given environment', async function() {
+    location = {
+      ...location,
+      pathname: '/issues/groupId/',
+      query: {environment: 'staging'},
+    };
+
     const props = initializeOrg({
       project: TestStubs.Project(),
       organization: {
         features: ['related-events'],
       },
       router: {
-        location: {
-          pathname: '/issues/groupId/',
-          query: {environment: 'staging'},
-        },
+        location,
         params: {
           groupId: group.id,
         },
@@ -264,6 +268,7 @@ describe('groupDetails', function() {
         event,
         eventView: undefined,
         relatedEvents: [],
+        location,
       },
       {}
     );
@@ -303,10 +308,7 @@ describe('groupDetails', function() {
         features: ['related-events'],
       },
       router: {
-        location: {
-          pathname: '/issues/groupId/',
-          query: {environment: 'staging'},
-        },
+        location,
         params: {
           groupId: group.id,
         },
@@ -325,7 +327,7 @@ describe('groupDetails', function() {
     const emptyStateElement = wrapper.find('EmptyStateWarning');
     expect(emptyStateElement).toHaveLength(1);
     expect(emptyStateElement.text()).toEqual(
-      'No related events have been found for the last 24 hours.'
+      'No related events have been found 12 hours either before and after the occurrence of this event.'
     );
   });
 
@@ -351,10 +353,7 @@ describe('groupDetails', function() {
         features: ['related-events'],
       },
       router: {
-        location: {
-          pathname: '/issues/groupId/',
-          query: {environment: 'staging'},
-        },
+        location,
         params: {
           groupId: group.id,
         },
@@ -419,10 +418,7 @@ describe('groupDetails', function() {
       },
       project: TestStubs.Project(),
       router: {
-        location: {
-          pathname: '/issues/groupId/',
-          query: {environment: 'staging'},
-        },
+        location,
         params: {
           groupId: group.id,
         },

@@ -133,6 +133,7 @@ describe('groupEventDetails', () => {
 
     location = TestStubs.location({
       pathname: `/organizations/${org.slug}/${project.slug}/${event.groupID}/`,
+      query: {},
     });
 
     mockGroupApis();
@@ -415,7 +416,7 @@ describe('groupEventDetails', () => {
       const emptyStateElement = eventRelatedEvents.find('EmptyStateWarning');
       expect(emptyStateElement).toHaveLength(1);
       expect(emptyStateElement.text()).toEqual(
-        'No related events have been found for the last 24 hours.'
+        'No related events have been found 12 hours either before and after the occurrence of this event.'
       );
     });
 

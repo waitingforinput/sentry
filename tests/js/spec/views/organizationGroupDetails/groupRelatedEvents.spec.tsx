@@ -15,6 +15,18 @@ describe('GroupRelatedEvents', () => {
     features: ['discover-basic', 'related-events'],
   });
 
+  // @ts-ignore Cannot find name 'TestStubs'
+  const project = TestStubs.Project();
+
+  // @ts-ignore Cannot find name 'TestStubs'
+  const group = TestStubs.Group();
+
+  // @ts-ignore Cannot find name 'TestStubs'
+  const location = TestStubs.location({
+    pathname: `/organizations/${organization.slug}/${project.slug}/${group.groupID}/`,
+    query: {},
+  });
+
   const relatedEvents: GroupRelatedEventsProps['relatedEvents'] = [
     {
       'event.type': 'transaction',
@@ -48,13 +60,14 @@ describe('GroupRelatedEvents', () => {
         organization={organization}
         eventView={eventView}
         relatedEvents={[]}
+        location={location}
       />
     );
 
     const emptyStateElement = wrapper.find('EmptyStateWarning');
     expect(emptyStateElement).toHaveLength(1);
     expect(emptyStateElement.text()).toEqual(
-      'No related events have been found for the last 24 hours.'
+      'No related events have been found 12 hours either before and after the occurrence of this event.'
     );
   });
 
@@ -64,6 +77,7 @@ describe('GroupRelatedEvents', () => {
         organization={organization}
         eventView={eventView}
         relatedEvents={relatedEvents}
+        location={location}
       />,
       // @ts-ignore
       TestStubs.routerContext()
@@ -91,20 +105,14 @@ describe('GroupRelatedEvents', () => {
     expect(styledLinks.at(1).text()).toEqual(relatedEvents[1].id);
 
     expect(styledLinks.at(0).props().to).toStrictEqual({
-      pathname: '/organizations/org-slug/performance/summary/',
+      pathname: `/organizations/org-slug/performance/issues:${relatedEvents[0].id}/`,
       query: {
-        end: undefined,
-        environment: [],
-        project: relatedEvents[0]['project.id'],
-        query: '',
-        start: undefined,
-        statsPeriod: '24h',
         transaction: relatedEvents[0].title,
       },
     });
 
     expect(styledLinks.at(1).props().to).toEqual(
-      `/organizations/${organization.slug}/${relatedEvents[1].project}/${relatedEvents[1]['issue.id']}/`
+      `/organizations/${organization.slug}/${relatedEvents[1].project}/${relatedEvents[1]['issue.id']}/events/${relatedEvents[1].id}/`
     );
   });
 
@@ -114,6 +122,7 @@ describe('GroupRelatedEvents', () => {
         organization={{...organization, features: ['related-events']}}
         eventView={eventView}
         relatedEvents={relatedEvents}
+        location={location}
       />
     );
 
