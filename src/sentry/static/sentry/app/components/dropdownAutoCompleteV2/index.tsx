@@ -7,14 +7,13 @@ type MenuProps = React.ComponentProps<typeof Menu>;
 
 type Props = MenuProps & {
   // Should clicking the actor toggle visibility?
-  allowActorToggle: boolean;
-  children: () => React.ReactElement;
+  allowActorToggle?: boolean;
 };
 
 const DropdownAutoComplete = ({
   alignMenu = 'right',
   children,
-  allowActorToggle,
+  allowActorToggle = false,
   ...props
 }: Props) => (
   <Menu {...props} alignMenu={alignMenu}>

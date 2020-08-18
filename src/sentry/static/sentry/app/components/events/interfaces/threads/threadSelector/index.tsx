@@ -15,6 +15,8 @@ import Option from './option';
 import SelectedOption from './selectedOption';
 import Header from './header';
 
+type Items = React.ComponentProps<typeof DropdownAutoComplete>['items'];
+
 type Props = {
   threads: Array<Thread>;
   activeThread: Thread;
@@ -25,7 +27,7 @@ type Props = {
 const DROPDOWN_MAX_HEIGHT = 400;
 
 const ThreadSelector = ({threads, event, activeThread, onChange}: Props) => {
-  const getDropDownItem = (thread: Thread) => {
+  const getDropDownItem = (thread: Thread): Items[0] => {
     const threadInfo = filterThreadInfo(thread, event);
 
     const dropDownValue = `#${thread.id}: ${thread.name} ${threadInfo.label} ${threadInfo.filename}`;
@@ -37,8 +39,6 @@ const ThreadSelector = ({threads, event, activeThread, onChange}: Props) => {
 
     return {
       value: dropDownValue,
-      threadInfo,
-      thread,
       label: (
         <Option
           id={thread.id}
@@ -51,52 +51,43 @@ const ThreadSelector = ({threads, event, activeThread, onChange}: Props) => {
     };
   };
 
-  const getItems = () => {
+  const getItems = (): Items => {
     const [crashed, notCrashed] = partition(threads, thread => !!thread?.crashed);
     return [...crashed, ...notCrashed].map(getDropDownItem);
   };
 
-  const handleOnChange = ({thread}: {thread: Thread}) => {
-    if (onChange) {
-      onChange(thread);
-    }
+  const handleOnChange = (item: Items[0]) => {
+    console.log('item', item);
+    // if (onChange) {
+    //   onChange(thread);
+    // }
   };
-
-  const items = getItems();
-  console.log('items', items);
-
-  return null;
 
   return (
     <StyledDropdownAutoComplete
       items={getItems()}
       onSelect={handleOnChange}
-      align="left"
       alignMenu="left"
       maxHeight={DROPDOWN_MAX_HEIGHT}
-      placeholder={t('Filter Threads')}
+      searchPlaceholder={t('Filter Threads')}
       emptyMessage={t('You have no threads')}
       noResultsMessage={t('No threads found')}
-      zIndex={theme.zIndex.dropdown}
       menuHeader={<Header />}
-      closeOnSelect
       emptyHidesInput
     >
-      {({isOpen, selectedItem}) => (
-        <StyledDropdownButton size="small" isOpen={isOpen} align="left">
-          {selectedItem ? (
-            <SelectedOption
-              id={selectedItem.thread.id}
-              details={selectedItem.threadInfo}
-            />
-          ) : (
-            <SelectedOption
-              id={activeThread.id}
-              details={filterThreadInfo(activeThread, event)}
-            />
-          )}
-        </StyledDropdownButton>
-      )}
+      {({isOpen, selectedItem}) => {
+        console.log('selectedItem', selectedItem);
+        return (
+          <StyledDropdownButton size="small" isOpen={isOpen} align="left">
+            {
+              <SelectedOption
+                id={activeThread.id}
+                details={filterThreadInfo(activeThread, event)}
+              />
+            }
+          </StyledDropdownButton>
+        );
+      }}
     </StyledDropdownAutoComplete>
   );
 };
