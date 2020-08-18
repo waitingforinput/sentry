@@ -115,7 +115,7 @@ const RelatedEvents = ({
               <TimeWrapper>
                 <IconClock size="16px" />
                 <StyledTimeSince date={timestamp} />
-                <div>{'-'}</div>
+                <div>{'\u2014'}</div>
                 <DateTime date={timestamp} />
               </TimeWrapper>
             </StyledPanelItem>
