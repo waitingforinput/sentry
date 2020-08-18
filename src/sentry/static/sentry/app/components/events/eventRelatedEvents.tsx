@@ -33,7 +33,7 @@ type State = {
 class EventRelatedEvents extends React.Component<Props, State> {
   state: State = {
     isLoading: true,
-    orgFeatures: new Set(this.props.organization.slug),
+    orgFeatures: new Set(this.props.organization.features),
     orgSlug: this.props.organization.slug,
   };
 
