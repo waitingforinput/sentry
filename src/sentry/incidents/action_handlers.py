@@ -14,6 +14,7 @@ from sentry.incidents.models import (
     IncidentTrigger,
     INCIDENT_STATUS,
 )
+from sentry.models.sentryapp import SentryApp
 from sentry.utils.email import MessageBuilder
 from sentry.utils.http import absolute_uri
 
@@ -147,6 +148,17 @@ class PagerDutyActionHandler(ActionHandler):
         pass
 
 
+@AlertRuleTriggerAction.register_type(
+    "integration",
+    AlertRuleTriggerAction.Type.INTEGRATION,
+    [AlertRuleTriggerAction.TargetType.SENTRY_APP],
+)
+class IntegrationActionHandler(ActionHandler):
+    def fire(self, metric_value):
+        self.send_alert(metric_value)
+
+    def resolve(self, metric_value):
+        self.send_alert(metric_value)
 def format_duration(minutes):
     """
     Format minutes into a duration string

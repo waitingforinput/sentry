@@ -22,6 +22,8 @@ class AlertRuleTriggerActionSerializer(Serializer):
             return "Send a Slack notification to " + action.target_display
         elif action.type == action.Type.MSTEAMS.value:
             return "Send a Microsoft Teams notification to " + action.target_display
+        elif action.type == action.Type.INTEGRATION.value:
+            return "Send a Internal Integration notification to " + action.target_display
 
     def get_identifier_from_action(self, action):
         target_identifier = (
@@ -46,6 +48,7 @@ class AlertRuleTriggerActionSerializer(Serializer):
             ],
             "targetIdentifier": self.get_identifier_from_action(obj),
             "integrationId": obj.integration_id,
+            "sentryAppId": obj.sentry_app_id,
             "dateCreated": obj.date_added,
             "desc": self.human_desc(obj),
         }

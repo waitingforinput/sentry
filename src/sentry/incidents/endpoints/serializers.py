@@ -35,6 +35,7 @@ from sentry.incidents.models import (
     AlertRuleTriggerAction,
 )
 from sentry.models.organizationmember import OrganizationMember
+from sentry.models.sentryapp import SentryApp
 from sentry.models.team import Team
 from sentry.models.user import User
 from sentry.snuba.dataset import Dataset
@@ -54,6 +55,7 @@ action_target_type_to_string = {
     AlertRuleTriggerAction.TargetType.USER: "user",
     AlertRuleTriggerAction.TargetType.TEAM: "team",
     AlertRuleTriggerAction.TargetType.SPECIFIC: "specific",
+    AlertRuleTriggerAction.TargetType.SENTRY_APP: "integration",
 }
 string_to_action_target_type = {v: k for (k, v) in action_target_type_to_string.items()}
 
@@ -153,6 +155,17 @@ class AlertRuleTriggerActionSerializer(CamelSnakeModelSerializer):
                 raise serializers.ValidationError(
                     {"integration": "Integration must be provided for slack"}
                 )
+
+        elif attrs.get("type") == AlertRuleTriggerAction.Type.INTEGRATION:
+            if not attrs.get("integration"):
+                raise serializers.ValidationError(
+                    {"integration": "Integration must be provided for TODO"}
+                )
+
+            try:
+                sentry_app = SentryApp.objects.get(id=app.id)
+            except SentryApp.DoesNotExist:
+                raise serializers.ValidationError("SentryApp does not exist")
 
         return attrs
 

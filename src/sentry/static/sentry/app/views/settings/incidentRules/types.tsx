@@ -82,6 +82,7 @@ export enum ActionType {
   SLACK = 'slack',
   PAGERDUTY = 'pagerduty',
   MSTEAMS = 'msteams',
+  INTEGRATION = 'integration', // TODO MARCOS Is this sane?
 }
 
 export enum TargetType {
@@ -93,6 +94,7 @@ export enum TargetType {
 
   // Just works with email for now, grabs the emails for all team members
   TEAM = 'team',
+  SENTRY_APP = 'integration',
 }
 
 /**

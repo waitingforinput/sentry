@@ -32,6 +32,7 @@ const ActionLabel = {
   [ActionType.SLACK]: t('Slack'),
   [ActionType.PAGERDUTY]: t('Pagerduty'),
   [ActionType.MSTEAMS]: t('Microsoft Teams'),
+  [ActionType.INTEGRATION]: t('Integration'),
 };
 
 const TargetLabel = {

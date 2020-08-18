@@ -539,8 +539,9 @@ class AlertRuleTriggerAction(Model):
         PAGERDUTY = 1
         SLACK = 2
         MSTEAMS = 3
+        INTEGRATION = 4
 
-    INTEGRATION_TYPES = frozenset((Type.PAGERDUTY.value, Type.SLACK.value, Type.MSTEAMS.value))
+    INTEGRATION_TYPES = frozenset((Type.PAGERDUTY.value, Type.SLACK.value, Type.MSTEAMS.value, Type.INTEGRATION.value))
 
     class TargetType(Enum):
         # A direct reference, like an email address, Slack channel, or PagerDuty service
@@ -550,6 +551,8 @@ class AlertRuleTriggerAction(Model):
         # A specific team. This could be used to send an email to everyone associated
         # with a team.
         TEAM = 2
+        # When it's a Sentry App, it's none of the above.
+        SENTRY_APP = 3
 
     TypeRegistration = namedtuple(
         "TypeRegistration",
@@ -586,6 +589,8 @@ class AlertRuleTriggerAction(Model):
         elif self.target_type == self.TargetType.SPECIFIC.value:
             # TODO: This is only for email. We should have a way of validating that it's
             # ok to contact this email.
+            return self.target_identifier
+        elif self.target_type == self.TargetType.SENTRY_APP.value:
             return self.target_identifier
 
     def build_handler(self, incident, project):
