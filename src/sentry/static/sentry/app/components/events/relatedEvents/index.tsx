@@ -57,7 +57,7 @@ const RelatedEvents = ({currentLocation, orgSlug, eventView, relatedEvents}: Pro
     }
 
     return dataRow.type === EVENT_TYPE.ERROR
-      ? `/organizations/${orgSlug}/issues/${dataRow['issue.id']}/`
+      ? `/organizations/${orgSlug}/issues/${dataRow['issue.id']}/events/${dataRow.id}/`
       : getTransactionLink(String(dataRow['project.id']), String(dataRow.title));
   };
 
