@@ -4,7 +4,7 @@ import partition from 'lodash/partition';
 
 import {Thread} from 'app/types/events';
 import {Event, EntryTypeData} from 'app/types';
-import DropdownAutoComplete from 'app/components/dropdownAutoComplete';
+import DropdownAutoComplete from 'app/components/dropdownAutoCompleteV2';
 import DropdownButton from 'app/components/dropdownButton';
 import theme from 'app/utils/theme';
 import {t} from 'app/locale';
@@ -61,6 +61,11 @@ const ThreadSelector = ({threads, event, activeThread, onChange}: Props) => {
       onChange(thread);
     }
   };
+
+  const items = getItems();
+  console.log('items', items);
+
+  return null;
 
   return (
     <StyledDropdownAutoComplete
